@@ -14,7 +14,7 @@ import { Achievement, GameTier, Match, MatchRatio, User } from "./profileType";
 
 const Profile = () => {
   const modalHandler = ModalHandler();
-  const { id } = useParams<{ id: string }>();
+  const { userId } = useParams<{ userId: string }>();
 
   const [user, setUser] = useState<User | null>(null);
   // const [topRate, setTopRate] = useState<string>("100");
@@ -30,9 +30,7 @@ const Profile = () => {
     if (e.key !== "Enter" || search === "") return;
 
     axios
-      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`, {
-        withCredentials: true,
-      })
+      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`)
       .then((res) => {
         window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${res.data.id}`;
       })
@@ -62,9 +60,9 @@ const Profile = () => {
     axios
     .all([
       axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/${id}`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/match/user/${id}`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/achievement/${id}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/${userId}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/match/user/${userId}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/achievement/${userId}`),
     ])
     .then(
       axios.spread((userList, userInfo, matchList, achievementList) => { //achievementList

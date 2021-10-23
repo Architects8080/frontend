@@ -9,7 +9,7 @@ import "./game.scss";
 import ModalHandler from "../../components/modal/modalhandler";
 
 const Game = () => {
-  const { id } = useParams<{ id: string }>();
+  const { gameId } = useParams<{ gameId: string }>();
 
   const modalHandler = ModalHandler();
   const [gameInfo, setGameInfo] = useState<GameInfo | null>(null);
@@ -28,8 +28,8 @@ const Game = () => {
   };
 
   useEffect(() => {
-    io.on("update", async (gameId, updateInfo: GameInfo) => {
-      if (gameId == id) {
+    io.on("update", async (id, updateInfo: GameInfo) => {
+      if (id == gameId) {
         temp = updateInfo;
         setGameInfo(updateInfo);
       }
@@ -41,12 +41,12 @@ const Game = () => {
         playerInfo["player2"] = player2Data.data;
       }
     });
-    io.on("vanished", (gameId: string) => {
-      if (gameId == id) {
+    io.on("vanished", (id: string) => {
+      if (id == gameId) {
         window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
       }
     });
-    io.emit("observe", [id]);
+    io.emit("observe", [gameId]);
   }, []);
 
   return (
@@ -81,7 +81,7 @@ const Game = () => {
               </div>
             </div>
             <div className="game-window">
-              <Pong gameId={id} gameInfo={gameInfo}></Pong>
+              <Pong gameId={gameId} gameInfo={gameInfo}></Pong>
             </div>
           </div>
         ) : (

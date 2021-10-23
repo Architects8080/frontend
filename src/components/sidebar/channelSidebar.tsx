@@ -28,61 +28,64 @@ const ChannelSidebar = (prop: SidebarProps) => {
   const handleModalOpen = modalHandler.handleModalOpen;
   const handleModalClose = modalHandler.handleModalClose;
 
-  // first render -> get userList according to sidebarType(prop.title)
-  // const addMember = (newMemArr: UserItemProps[]) => {
+  // const addMember = (newMemArr: ChannelMember[]) => {
   //   setUserList(newMemArr);
   // };
-  // const removeMember = (leavedArr: UserItemProps[]) => {
+  // const removeMember = (leavedArr: ChannelMember[]) => {
   //   setUserList(leavedArr);
   // };
 
   useEffect(() => {
     getChannelmember();
-    // getMyProfile();
-  
-    // ioChannel.on("channelMemberAdd", (newMember: UserItemProps) => {
-    //   if (userList && !userList.some((user) => user.id === newMember.id)) {
-    //     const newMemArr = [...userList, newMember];
-    //     addMember(newMemArr);
-    //   }
-    // });
+  }, []);
 
-    // ioChannel.on("channelMemberRemove", (userId) => {
-    //   if (userList) {
-    //     const leavedArr = userList.filter((user) => user.id !== userId);
-    //     removeMember(leavedArr);
-    //   }
-    // });
+  useEffect(() => {
+
+    ioChannel.on("addChannelMember", (channelId: number, member: ChannelMember) => {
+      console.log(`addChannelMember!, member : `, member);
+      if (!memberList.some(joinMember => joinMember.userId === member.userId)) {
+        setMemberList(memberList => [...memberList, member]);
+      }
+    });
+
+    ioChannel.on("removeChannelMember", (channelId: number, userId: number) => {
+      console.log(`removeChannelMember!`);
+      setMemberList(memberList => memberList.filter(joinMember => joinMember.userId !== userId));
+    });
+
+    ioChannel.on("updateChannelMember", (channelId: number, member: ChannelMember) => {
+      console.log(`updateChannelMember!`);
+      const updateMember = memberList.find(joinMember => joinMember.userId === member.userId);
+      if (updateMember) {
+        updateMember.channelId = member.channelId;
+        updateMember.id = member.id;
+        updateMember.role = member.role;
+        updateMember.user = member.user;
+        updateMember.userId = member.userId;
+        setMemberList([...memberList.filter(joinMember => joinMember.userId !== member.userId), updateMember]);
+      }
+    });
   }, []);
 
   const getChannelmember = async () => {
     try {
-      const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
-      console.log(`memberList.data : `, memberList.data);
-      setMemberList(memberList.data);
+        const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
+        console.log(`memberList.data : `, memberList.data);
+        setMemberList(memberList.data);
+  
+        const response = await axios.get(
+          `${process.env.REACT_APP_SERVER_ADDRESS}/user/me`,
+        );
+        const me = memberList.data.find((member: ChannelMember) => {
+          return member.userId === response.data.id
+        });
+        if (me)
+          setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_SERVER_ADDRESS}/user/me`,
-      );
-      const me = memberList.data.find((member: ChannelMember) => {
-        return member.userId === response.data.id
-      });
-      if (me)
-        setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
     } catch (error) {
       console.log(`[getChannelmember] ${error}`);
     }
   }
-
-  // const getMyProfile = async () => {
-  //   try {
-
-
-
-  //   } catch (e) {
-  //     console.log(`[MyProfile] ${e}`);
-  //   }
-  // };
 
   // to contextMenu
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });

@@ -1,5 +1,4 @@
 import React from "react";
-import * as uuid from 'uuid';
 import { useEffect } from "react";
 import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -11,19 +10,18 @@ import "./channel.scss";
 import GameModalListener from "../../components/modal/gameModalListener";
 import axios from "axios";
 import ChannelSidebar from "../../components/sidebar/channelSidebar";
+import { User } from "../profile/profileType";
 
-// 서버로부터 받아서 message state 에 넣을 때 들어가는 형태
-type Message = {
-  id: string;
-  name: string;
-  text: string;
+type ChannelMessageDto = {
+  channelId: number;
+  message: string;
 };
 
 // 서버로부터 받는 메시지 형태
-type Payload = {
-  id: number;
-  name: string;
-  text: string;
+type ChannelMessage = {
+  channelId: number;
+  memberId: number;
+  message: string;
 }
 
 const AlwaysScrollToBottom = () => {
@@ -34,50 +32,60 @@ const AlwaysScrollToBottom = () => {
 
 const Channel = () => {
   const modalHandler = ModalHandler();
-  const [messages, setMessages] = useState<Message[]>([]);
-  
-  const [text, setText] = useState('');
-  let { id } : any = useParams();
+  const [messageList, setMessageList] = useState<ChannelMessage[]>([]);
 
-  useEffect(() => {
-    const receivedMessage = (message: Payload) => {
-      const newMessage: Message = {
-        id: uuid.v4(),
-        name: message.name,
-        text: message.text,
-      };
-      setMessages([...messages, newMessage]);
-    }
+  const [isJoin, setIsJoin] = useState(false);
+  const [isMute, setIsMute] = useState(false);
+  const [message, setMessage] = useState('');
+  const { channelId } : any = useParams();
 
-    axios
-    .post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${id}/member`)
-    .then() //SUCCESS
-    .catch((e) => {
-      console.log(`error : `, e.response.data);
-      if (e.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
+  const channelInit = async () => {
+    try {
+      const test = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
+      const messageList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/message`);
+      setMessageList(messageList.data)
+      ioChannel.emit('subscribeChannel', channelId);
+    } catch (error: any) {
+      if (error.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
         window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main `;
         window.alert("비정상적인 접근입니다");
       }
-    })
+    }
+  }
 
-    ioChannel.on('msgToClient', (message: Payload) => {
-      receivedMessage(message);
+  useEffect(() => {
+    channelInit();
+
+    ioChannel.on('messageToClient', (message: ChannelMessage) => {
+      console.log(`message : `, messageList)
+      setMessageList([...messageList, message]);
     });
-  }, [messages, id]);
+
+    ioChannel.on('muteMember', (channelId: number, expired: Date) => {
+      console.log(`mute!`);
+      setIsMute(true);
+    });
+
+    ioChannel.on('unmuteMember', (channelId: number) => {
+      console.log(`unmute!`);
+      setIsMute(false);
+    });
+  }, []);
 
   const sendMessage = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key !== 'Enter' || text === '')
+		if (e.key !== 'Enter' || message === '')
 			return;
-		const newMessageSend = {
-      channelId: id,
-      text: text,
+		const newMessageSend: ChannelMessageDto = {
+      channelId: Number(channelId),
+      message: message,
 		};
-		ioChannel.emit('msgToChannel', newMessageSend);
-		setText('');
+		ioChannel.emit('messageToServer', newMessageSend);
+		setMessage('');
 	}
 
   const leaveChannel = async () => {
-    await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${id}/member`);
+    ioChannel.emit(`unsubscribeChannel`, (channelId));
+    await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
     window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
   }
 
@@ -86,24 +94,24 @@ const Channel = () => {
       <Header isLoggedIn={true} />
       <div className="page">
         <ChannelSidebar
-          channelId={id}
+          channelId={channelId}
           modalHandler={modalHandler}
         />
         <div className="channel-wrap">
           <div className="channel-message-list-wrap">
             <div className="channel-message-list">
-              <ChatMessage isSelfMessage={false} nickname="chlee" content="test" />
-              {messages.map(message => (
-                <ChatMessage key={message.id} isSelfMessage={true} nickname={message.name} content={message.text}/>
-              ))}
+              {messageList.length != 0 ? messageList.map(message => (
+                <ChatMessage key={message.channelId} memberId={message.memberId} message={message.message}/>
+              )): ""}
               <AlwaysScrollToBottom/>
             </div>
             <div className="channel-user-input">
               <input 
+                disabled={isMute}
                 className="input-field"
                 placeholder="내용을 입력하세요"
-                value={text}
-                onChange={e => setText(e.target.value)}
+                value={message}
+                onChange={e => setMessage(e.target.value)}
                 onKeyPress={sendMessage}
               />
             </div>
