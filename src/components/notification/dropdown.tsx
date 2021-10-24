@@ -23,15 +23,17 @@ type Notification = {
   id: number;
   senderId: number;
   receiverId: number;
+  sender: User;
   //채널 초대: channelId
   //친구 요청: senderId
-  sender: User;
   targetId: number;
   type: NotificationType;
 };
 
 type NotificationItemProp = {
   id: number;
+  targetId: number;
+  type: NotificationType
   title: string;
   description: string;
   acceptCallback: (id: number) => void;
@@ -85,8 +87,15 @@ const NotificationOverlay = (prop: DropdownProps) => {
     });
 
     //Redirect
-    if (acceptedNoti && acceptedNoti.title == "채팅방 초대")
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${acceptedNoti.id}`;
+    if (acceptedNoti && acceptedNoti.type == NotificationType.CHANNEL) {
+      try {
+        const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${acceptedNoti.targetId}/member`);
+      } catch (error: any) {
+        if (error.response.status != 409) 
+          return
+      }
+      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${acceptedNoti.targetId}`;
+    }
   };
 
   const rejectCallback = async (id: number) => {
@@ -108,6 +117,8 @@ const NotificationOverlay = (prop: DropdownProps) => {
   const notificationToProps = (noti: Notification) => {
     return {
       id: noti.id,
+      targetId: noti.targetId,
+      type: noti.type,
       title: getTitleFromNotification(noti),
       description: getDescriptionFromNotification(noti),
       acceptCallback: acceptCallback,
