@@ -10,7 +10,6 @@ import "./channel.scss";
 import GameModalListener from "../../components/modal/gameModalListener";
 import axios from "axios";
 import ChannelSidebar from "../../components/sidebar/channelSidebar";
-import { User } from "../profile/profileType";
 
 type ChannelMessageDto = {
   channelId: number;
@@ -19,9 +18,14 @@ type ChannelMessageDto = {
 
 // 서버로부터 받는 메시지 형태
 type ChannelMessage = {
+  id: number,
   channelId: number;
-  memberId: number;
   message: string;
+  sender: {
+    id: number,
+    nickname: string,
+    avatar: string,
+  }
 }
 
 const AlwaysScrollToBottom = () => {
@@ -34,22 +38,31 @@ const Channel = () => {
   const modalHandler = ModalHandler();
   const [messageList, setMessageList] = useState<ChannelMessage[]>([]);
 
+  const [userId, setUserId] = useState(0);
   const [isJoin, setIsJoin] = useState(false);
   const [isMute, setIsMute] = useState(false);
   const [message, setMessage] = useState('');
   const { channelId } : any = useParams();
 
   const channelInit = async () => {
+    const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+    setUserId(user.data.id)
     try {
-      const test = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
-      const messageList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/message`);
-      setMessageList(messageList.data)
-      ioChannel.emit('subscribeChannel', channelId);
+      await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
     } catch (error: any) {
+      console.log(error);
       if (error.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
         window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main `;
         window.alert("비정상적인 접근입니다");
       }
+    }
+    try {
+      const messageList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/message`);
+      console.log(messageList);
+      setMessageList(messageList.data)
+      ioChannel.emit('subscribeChannel', channelId);
+    } catch (error: any) {
+     
     }
   }
 
@@ -58,7 +71,7 @@ const Channel = () => {
 
     ioChannel.on('messageToClient', (message: ChannelMessage) => {
       console.log(`message : `, messageList)
-      setMessageList([...messageList, message]);
+      setMessageList(messageList => [...messageList, message]);
     });
 
     ioChannel.on('muteMember', (channelId: number, expired: Date) => {
@@ -101,7 +114,7 @@ const Channel = () => {
           <div className="channel-message-list-wrap">
             <div className="channel-message-list">
               {messageList.length != 0 ? messageList.map(message => (
-                <ChatMessage key={message.channelId} memberId={message.memberId} message={message.message}/>
+                <ChatMessage key={message.id} userId={userId} sender={message.sender} message={message.message}/>
               )): ""}
               <AlwaysScrollToBottom/>
             </div>

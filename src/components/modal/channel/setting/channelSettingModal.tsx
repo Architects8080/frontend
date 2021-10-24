@@ -56,7 +56,7 @@ const ChannelSettingModal = (prop: ChannelSettingModalProps) => {
     const channelDto: ChannelCreateDto = {
       title: title,
       type: channelType,
-      password: password,
+      password: channelType == ChannelType.PROTECTED ? password : undefined,
     };
 
     if (title !== '' && (channelType == ChannelType.PROTECTED && password && password.length == 4 || channelType != ChannelType.PROTECTED)) {

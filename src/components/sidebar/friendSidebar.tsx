@@ -46,6 +46,14 @@ const FriendSidebar = (prop: SidebarProps) => {
     ioCommunity.on("removeFriendUser", async (friendId: number) => {
       setUserList((userList) => userList.filter((f) => f.id != friendId));
     });
+
+    ioCommunity.on("changeUserStatus",  (id: number, status: number) => {
+      setUserList(userList => userList.map((f) => { 
+        if (f.id == id)
+          f.status = status;
+        return f;
+      }));
+    })
   }, []);
 
   const getMyProfile = async () => {

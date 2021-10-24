@@ -15,6 +15,7 @@ export enum SidebarProperty {
 export type ChannelMember = {
   id: number;
   channelId: number;
+  status: number;
   role: MemberRole;
   user: User;
   userId: number;

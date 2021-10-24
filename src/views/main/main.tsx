@@ -79,43 +79,44 @@ const Main = () => {
   useEffect(() => {
     ioChannel.on('addMyChannel', (newChannel: ChannelItemProps) => {
       console.log(`addMyChannel!`);
-      if (!myChannelList.some(myChannel => myChannel.id === newChannel.id)) {
-        setMyChannelList([...myChannelList, newChannel]);
+      if (!myChannelList.some(myChannel => myChannel.id == newChannel.id)) {
+        setMyChannelList(myChannelList => [...myChannelList, newChannel]);
       }
     });
 
     ioChannel.on('removeMyChannel', (channelId: number) => {
       console.log(`removeMyChannel!`);
-      setMyChannelList(myChannelList.filter(myChannel => myChannel.id !== channelId));
+      setMyChannelList(myChannelList => myChannelList.filter(myChannel => myChannel.id != channelId));
     });
 
     ioChannel.on('addChannel', (newChannel: ChannelItemProps) => {
       console.log(`addChannel!`);
-      if (!channelList.some(channel => channel.id === newChannel.id)) {
-        setChannelList([...channelList, newChannel]);
+      if (!channelList.some(channel => channel.id == newChannel.id)) {
+        setChannelList(channelList => [...channelList, newChannel]);
       }
     });
 
     ioChannel.on('removeChannel', (channelId: number) => {
       console.log(`removeChannel!`);
-      setChannelList(channelList.filter(channel => channel.id !== channelId));
+      setChannelList(channelList => channelList.filter(channel => channel.id != channelId));
     });
 
     ioChannel.on('updateChannel', (channel: ChannelItemProps) => {
-      console.log(`updateChannel!`);
-      const updateChannel = channelList.find(item => item.id === channel.id);
+      const updateChannel = channelList.find(item => item.id == channel.id);
+      console.log(updateChannel);
+      console.log(channel);
       if (updateChannel) {
         updateChannel.id = channel.id;
         updateChannel.memberCount = channel.memberCount;
         updateChannel.title = channel.title;
         updateChannel.type = channel.type;
-        setChannelList([...channelList.filter(item => item.id !== channel.id), updateChannel]);
+        setChannelList(channelList => [...channelList.filter(item => item.id != channel.id), updateChannel]);
       }
     });
 
     ioChannel.on('deleteChannel', (channelId: number) => {
       console.log(`deleteChannel!`);
-      setChannelList(channelList.filter(channel => channel.id !== channelId));
+      setChannelList(channelList => channelList.filter(channel => channel.id != channelId));
     });
   }, []);
 

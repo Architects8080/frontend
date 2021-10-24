@@ -43,27 +43,23 @@ const ChannelSidebar = (prop: SidebarProps) => {
 
     ioChannel.on("addChannelMember", (channelId: number, member: ChannelMember) => {
       console.log(`addChannelMember!, member : `, member);
-      if (!memberList.some(joinMember => joinMember.userId === member.userId)) {
+      if (!memberList.some(joinMember => joinMember.userId == member.userId)) {
         setMemberList(memberList => [...memberList, member]);
       }
     });
 
     ioChannel.on("removeChannelMember", (channelId: number, userId: number) => {
       console.log(`removeChannelMember!`);
-      setMemberList(memberList => memberList.filter(joinMember => joinMember.userId !== userId));
+      setMemberList(memberList => memberList.filter(joinMember => joinMember.userId != userId));
     });
 
-    ioChannel.on("updateChannelMember", (channelId: number, member: ChannelMember) => {
+    ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
       console.log(`updateChannelMember!`);
-      const updateMember = memberList.find(joinMember => joinMember.userId === member.userId);
-      if (updateMember) {
-        updateMember.channelId = member.channelId;
-        updateMember.id = member.id;
-        updateMember.role = member.role;
-        updateMember.user = member.user;
-        updateMember.userId = member.userId;
-        setMemberList([...memberList.filter(joinMember => joinMember.userId !== member.userId), updateMember]);
-      }
+      setMemberList(memberList => memberList.map(member => {
+        if (member.userId == updateMember.userId) 
+          return updateMember
+        return member;
+      }))
     });
   }, []);
 
@@ -134,7 +130,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
         {/* TODO: update  */}
         {memberList ? memberList.map((member) => (
           <SidebarItem
-            // key={member.id}
+            key={member.userId}
             itemType={SidebarProperty.CHAT_MEMBER_LIST}
             contextMenuHandler={contextMenuHandler}
             channelId={prop.channelId}

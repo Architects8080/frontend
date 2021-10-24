@@ -28,8 +28,15 @@ const ChannelItem = ({channel} : {channel:ChannelItemProps}) => {
         !response.data.find((element: any) => element.id === channel.id)) {
         modalHandler.handleModalOpen("enterPassword");
     }
-    else
+    else {
+      try {
+        const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channel.id}/member`);
+      } catch (error: any) {
+        if (error.response.status != 409) 
+          return
+      }
       window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${channel.id}`
+    }
   };
 
   const handleModalClose = () => {
