@@ -49,12 +49,9 @@ const SidebarItem = (prop: SidebarItemProps) => {
 
   const [friendList, setFriendList] = useState<User[]>([]);
   useEffect(() => {
-    try {
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/friend`)
-      .then(response => {setFriendList(response.data)})
-    } catch (error) {
-      
-    }
+    axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/friend`)
+    .then(response => {setFriendList(response.data)})
+    .catch(() => {})
   }, []);
 
   const isFriend = () => {

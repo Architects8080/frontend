@@ -41,24 +41,23 @@ const Header = (prop: HeaderProps) => {
 
   useEffect(() => {
     //list check and url setting
-    try {
-      axios
-      .all([
-        axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`),
-        axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/notification`),
-      ])
-      .then(
-        axios.spread((userInfo, notiList) => {
-          console.log(notiList);
-          setUser(userInfo.data);
-          setNotiCount(notiList.data.length);
+    axios
+    .all([
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/notification`),
+    ])
+    .then(
+      axios.spread((userInfo, notiList) => {
+        console.log(notiList);
+        setUser(userInfo.data);
+        setNotiCount(notiList.data.length);
 
-          if (notiList.data.length > 0) setNotifyIconURL(NotifyIconURL.ON);
-        })
-      );
-    } catch (error) {
-      
-    }
+        if (notiList.data.length > 0) setNotifyIconURL(NotifyIconURL.ON);
+      })
+    )
+    .catch(error => {
+      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/login`;
+    });
   }, []);
 
   const updateNotiCount = (notiCount: number) => {

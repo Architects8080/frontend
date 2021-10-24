@@ -67,22 +67,17 @@ const ChannelCreateModal = (prop: ChannelCreateModalProps) => {
       password: password,
     };
 
-    try {
-      if (title !== '' && (channelType == ChannelType.PROTECTED && password.length == 4 || channelType != ChannelType.PROTECTED)) {
-        axios.post(
-          `${process.env.REACT_APP_SERVER_ADDRESS}/channel/`, channelDto
-        ).then(response => {
-          prop.close();
-          window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${response.data.channelId}`
-        }).catch(e => {
-          console.log(e);
-          setErrorText("채널 생성에 실패했습니다.");
-        })
-      }
-    } catch (error) {
-      
+    if (title !== '' && (channelType == ChannelType.PROTECTED && password.length == 4 || channelType != ChannelType.PROTECTED)) {
+      axios.post(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/channel/`, channelDto
+      ).then(response => {
+        prop.close();
+        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${response.data.channelId}`
+      }).catch(e => {
+        console.log(e);
+        setErrorText("채널 생성에 실패했습니다.");
+      })
     }
-
   };
 
   const [channelType, setChannelType] = useState(ChannelType.PUBLIC);

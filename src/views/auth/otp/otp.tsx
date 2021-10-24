@@ -14,22 +14,18 @@ const OTP = () => {
     if ((lastCharCode >= 48 && lastCharCode <= 57) || e.target.value === "")
       setOTP(userInput);
 
-    try {
-      if (userInput.length === 6) {
-        axios
-          .post(
-            `${process.env.REACT_APP_SERVER_ADDRESS}/otp/login`,
-            { token: userInput },
-          )
-          .then((res) => {
-            window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
-          })
-          .catch((err) => {
-            snackbar.error("잘못된 코드입니다.");
-          });
-      }
-    } catch (error) {
-      
+    if (userInput.length === 6) {
+      axios
+        .post(
+          `${process.env.REACT_APP_SERVER_ADDRESS}/otp/login`,
+          { token: userInput },
+        )
+        .then((res) => {
+          window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+        })
+        .catch((err) => {
+          snackbar.error("잘못된 코드입니다.");
+        });
     }
   };
 
