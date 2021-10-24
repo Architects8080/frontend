@@ -28,13 +28,6 @@ const ChannelSidebar = (prop: SidebarProps) => {
   const handleModalOpen = modalHandler.handleModalOpen;
   const handleModalClose = modalHandler.handleModalClose;
 
-  // const addMember = (newMemArr: ChannelMember[]) => {
-  //   setUserList(newMemArr);
-  // };
-  // const removeMember = (leavedArr: ChannelMember[]) => {
-  //   setUserList(leavedArr);
-  // };
-
   useEffect(() => {
     getChannelmember();
   }, []);
@@ -54,10 +47,10 @@ const ChannelSidebar = (prop: SidebarProps) => {
     });
 
     ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
-      console.log(`updateChannelMember!`);
+      console.log(`updateChannelMember! : `, updateMember);
       setMemberList(memberList => memberList.map(member => {
         if (member.userId == updateMember.userId) 
-          return updateMember
+          return updateMember;
         return member;
       }))
     });
@@ -65,18 +58,15 @@ const ChannelSidebar = (prop: SidebarProps) => {
 
   const getChannelmember = async () => {
     try {
-        const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
-        console.log(`memberList.data : `, memberList.data);
-        setMemberList(memberList.data);
+      const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
+      setMemberList(memberList.data);
   
-        const response = await axios.get(
-          `${process.env.REACT_APP_SERVER_ADDRESS}/user/me`,
-        );
-        const me = memberList.data.find((member: ChannelMember) => {
-          return member.userId === response.data.id
-        });
-        if (me)
-          setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+      const me = memberList.data.find((member: ChannelMember) => {
+        return member.userId === response.data.id
+      });
+      if (me)
+        setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
 
     } catch (error) {
       console.log(`[getChannelmember] ${error}`);

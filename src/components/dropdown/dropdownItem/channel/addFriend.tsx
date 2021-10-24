@@ -8,7 +8,10 @@ type ItemProps = {
 
 const AddFriendItem = (prop: ItemProps) => {
   const handleAddFriend = () => {
-    axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/friend/${prop.targetId}`)
+    try {
+      axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/friend/${prop.targetId}`)
+    } catch (error) {
+    }
   };
 
   return (

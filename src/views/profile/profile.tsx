@@ -30,13 +30,13 @@ const Profile = () => {
     if (e.key !== "Enter" || search === "") return;
 
     axios
-      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`)
-      .then((res) => {
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${res.data.id}`;
-      })
-      .catch((err) => {
-        snackbar.error("유저가 존재하지 않습니다.");
-      });
+    .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`)
+    .then((res) => {
+      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${res.data.id}`;
+    })
+    .catch((err) => {
+      snackbar.error("유저가 존재하지 않습니다.");
+    });
   };
 
   const getTier = (ladderPoint: number) => {
@@ -146,9 +146,9 @@ const Profile = () => {
               <div className="achievement-list">
                 { achievementTitle.map((title, index) => {
                     if (achievedList && achievedList.length != 0 && achievedList.find(achievement => achievement.id == index + 1))
-                      return <AchievementItem title={title} isAchieve={true} />
+                      return <AchievementItem key={index} title={title} isAchieve={true} />
                     else
-                      return <AchievementItem title={title} isAchieve={false} />
+                      return <AchievementItem key={index} title={title} isAchieve={false} />
                   })
                 }
               </div>

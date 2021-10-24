@@ -34,10 +34,7 @@ const FriendSidebar = (prop: SidebarProps) => {
     ioCommunity.on(
       "addFriendUser",
       async (friend: Omit<User, "alert">) => {
-        console.log(userList);
-        console.log(friend);
         const existIndex = userList.findIndex((f) => f.id == friend.id);
-        console.log(existIndex);
         if (existIndex == -1)
           setUserList((userList) => [...userList, { alert: false, ...friend }]);
       }
@@ -203,7 +200,7 @@ const FriendSidebar = (prop: SidebarProps) => {
       </div>
       <ul className="user-list">
         {userList ? userList.map((user) => (
-          <li onClick={openDM} value={user.id}>
+          <li onClick={openDM} value={user.id} key={user.id}>
             {user.alert && <span className="alert-overlay"></span>}
             <SidebarItem
               contextMenuHandler={contextMenuHandler}

@@ -71,20 +71,6 @@ const ChannelSettingModal = (prop: ChannelSettingModalProps) => {
     }
   };
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}`)
-  //     .then((channel) => {
-  //       console.log(`channel.data : `, channel.data);
-  //       setTitle(channel.data.title);
-  //       setChannelType(channel.data.type);
-  //       if (channel.data.type === ChannelType.PROTECTED)
-  //         setErrorText("비밀번호를 새로 입력해주세요.");
-  //       if (channel.data.type === ChannelType.PRIVATE)
-  //         setErrorText("public를 선택하면 공개방으로 변경됩니다.");
-  //     })
-  // }, []);
-
   const handleChange = (selectedType: ChannelType) => {
     setChannelType(selectedType);
     if (selectedType != ChannelType.PROTECTED) {

@@ -10,8 +10,6 @@ import ModalHandler from "../../components/modal/modalhandler";
 
 const Game = () => {
   const { gameId } = useParams<{ gameId: string }>();
-
-  const modalHandler = ModalHandler();
   const [gameInfo, setGameInfo] = useState<GameInfo | null>(null);
   var temp: GameInfo | null = null;
 
@@ -22,9 +20,13 @@ const Game = () => {
   });
 
   const getPlayerInfo = async (playerId: number): Promise<any> => {
-    return axios.get(
-      process.env.REACT_APP_SERVER_ADDRESS + "/user/" + playerId
-    );
+    try {
+      return axios.get(
+        process.env.REACT_APP_SERVER_ADDRESS + "/user/" + playerId
+      );
+    } catch (error) {
+      
+    }
   };
 
   useEffect(() => {

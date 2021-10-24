@@ -74,12 +74,12 @@ const DirectMessage = ({myProfile, DMReceiver, DMReceiverRef, closeDM, alertNewD
 			<ul>
 				{DMList.map(DM => (
 					DM.id === myProfile.id ? (
-						<li className="dm-message my-dm" ref={DMRef}>
+						<li className="dm-message my-dm" ref={DMRef} key={DM.id}>
 							<div className="dm-user">{myProfile.nickname}</div>
 							<div className="dm-text">{DM.message}</div>
 						</li>
 					):(
-						<li className="dm-message other-dm" ref={DMRef}>
+						<li className="dm-message other-dm" ref={DMRef} key={DM.id}>
 							<div className="profile small">
 								<img className="avatar" src={DMReceiver.avatar} alt="cannot loaded avatar" />
 							</div>

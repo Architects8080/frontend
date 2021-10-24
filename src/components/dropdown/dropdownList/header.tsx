@@ -19,10 +19,15 @@ const HeaderDropdownList = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
-    .then(response => {
-      setUser(response.data);
-    });
+    try {
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
+      .then(response => {
+        setUser(response.data);
+      });
+    } catch (error) {
+      
+    }
+
   }, []);
 
   return (

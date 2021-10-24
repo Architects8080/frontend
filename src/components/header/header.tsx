@@ -41,7 +41,8 @@ const Header = (prop: HeaderProps) => {
 
   useEffect(() => {
     //list check and url setting
-    axios
+    try {
+      axios
       .all([
         axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`),
         axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/notification`),
@@ -55,6 +56,9 @@ const Header = (prop: HeaderProps) => {
           if (notiList.data.length > 0) setNotifyIconURL(NotifyIconURL.ON);
         })
       );
+    } catch (error) {
+      
+    }
   }, []);
 
   const updateNotiCount = (notiCount: number) => {

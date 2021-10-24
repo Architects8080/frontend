@@ -39,14 +39,18 @@ const Channel = () => {
   const [messageList, setMessageList] = useState<ChannelMessage[]>([]);
 
   const [userId, setUserId] = useState(0);
-  const [isJoin, setIsJoin] = useState(false);
   const [isMute, setIsMute] = useState(false);
   const [message, setMessage] = useState('');
   const { channelId } : any = useParams();
 
   const channelInit = async () => {
-    const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
-    setUserId(user.data.id)
+    try {
+      const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+      setUserId(user.data.id)
+    } catch (error) {
+      
+    }
+
     try {
       await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
     } catch (error: any) {
@@ -98,7 +102,11 @@ const Channel = () => {
 
   const leaveChannel = async () => {
     ioChannel.emit(`unsubscribeChannel`, (channelId));
-    await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
+    try {
+      await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
+    } catch (error) {
+      
+    }
     window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
   }
 

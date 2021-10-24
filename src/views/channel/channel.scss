@@ -20,12 +20,12 @@
 
     .channel-message-list {
       overflow-y: hidden;
-      max-height: calc(100vh - 92px - 194px - 32px);
+      max-height: calc(100vh - 92px - 194px);
     }
 
     .channel-message-list:hover {
       overflow-y: auto;
-      max-height: calc(100vh - 92px - 194px - 32px);
+      max-height: calc(100vh - 92px - 194px);
     }
 
     .channel-user-input {

@@ -102,16 +102,16 @@ const Main = () => {
     });
 
     ioChannel.on('updateChannel', (channel: ChannelItemProps) => {
-      const updateChannel = channelList.find(item => item.id == channel.id);
-      console.log(updateChannel);
-      console.log(channel);
-      if (updateChannel) {
-        updateChannel.id = channel.id;
-        updateChannel.memberCount = channel.memberCount;
-        updateChannel.title = channel.title;
-        updateChannel.type = channel.type;
-        setChannelList(channelList => [...channelList.filter(item => item.id != channel.id), updateChannel]);
-      }
+      setMyChannelList(channelList => channelList.map(item => {
+        if (item.id == channel.id) 
+          return channel
+        return item;
+      }));
+      setChannelList(channelList => channelList.map(item => {
+        if (item.id == channel.id) 
+          return channel
+        return item;
+      }));
     });
 
     ioChannel.on('deleteChannel', (channelId: number) => {

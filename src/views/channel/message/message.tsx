@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { User } from "../../profile/profileType";
 import "./message.scss";
 
@@ -14,15 +13,16 @@ type ChatMessageProp = {
 };
 
 const ChatMessage = (prop: ChatMessageProp) => {
-  const [user, setUser] = useState<User>();
+  const anonymousAvatar = "https://w7.pngwing.com/pngs/565/454/png-transparent-user-computer-icons-anonymity-head-miscellaneous-face-service.png";
+  const anonymousNickname = "알 수 없음";
 
   return (
     <>
       {prop.userId != prop.sender?.id ? (
         <div className="other-message-wrap">
-          <img className="other-message-avatar" src={prop.sender?.avatar} alt="cannot load avatar"/>
+          <img className="other-message-avatar" src={prop.sender?.avatar == null ? anonymousAvatar : prop.sender?.avatar} alt="cannot load avatar"/>
           <div className="other-message-content">
-            <div className="message-username">{prop.sender?.nickname}</div>
+            <div className="message-username">{prop.sender?.nickname == null ? anonymousNickname : prop.sender?.nickname}</div>
             <div className="message-content">{prop.message}</div>
           </div>
         </div>

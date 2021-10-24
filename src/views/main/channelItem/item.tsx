@@ -22,21 +22,26 @@ const ChannelItem = ({channel} : {channel:ChannelItemProps}) => {
   const modalHandler = ModalHandler();
 
   const handleOnClick = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/me`);
-
-    if (channel.type === ChannelType.PROTECTED && 
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/me`);
+      if (channel.type === ChannelType.PROTECTED && 
         !response.data.find((element: any) => element.id === channel.id)) {
         modalHandler.handleModalOpen("enterPassword");
-    }
-    else {
-      try {
-        const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channel.id}/member`);
-      } catch (error: any) {
-        if (error.response.status != 409) 
-          return
       }
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${channel.id}`
+      else {
+        try {
+          const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channel.id}/member`);
+        } catch (error: any) {
+          if (error.response.status != 409) 
+            return
+        }
+        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${channel.id}`
+      }
+    } catch (error) {
+      
     }
+
+
   };
 
   const handleModalClose = () => {

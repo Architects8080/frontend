@@ -15,8 +15,13 @@ const BlockList = () => {
   const [blockList, setBlockList] = useState<BlockInfo[]>([]);
 
   const updateBlockList = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/block`);
-    setBlockList(response.data);
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/block`);
+      setBlockList(response.data);
+    } catch (error) {
+      
+    }
+
   }
 
   const deleteItem = (id: number) => {
@@ -35,7 +40,7 @@ const BlockList = () => {
           {blockList.length != 0 ? 
             <div className="blocklist">
               {blockList.map((item) => {
-                return <BlockItem id={item.other.id} avatar={item.other.avatar} 
+                return <BlockItem key={item.other.id} id={item.other.id} avatar={item.other.avatar} 
                         nickname={item.other.nickname} deleteItem={deleteItem}/>
               })}
             </div> 

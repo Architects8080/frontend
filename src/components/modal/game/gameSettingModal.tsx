@@ -25,11 +25,14 @@ const GameSettingModal = (prop: ModalProps) => {
   var isChecked = false;
 
   const getMapList = async (): Promise<any> => {
-    const data = await axios.get(
-      process.env.REACT_APP_SERVER_ADDRESS + "/game/map/list"
-    );
-
-    setMapList(data.data);
+    try {
+      const data = await axios.get(
+        process.env.REACT_APP_SERVER_ADDRESS + "/game/map/list"
+      );
+      setMapList(data.data);
+    } catch (error) {
+      
+    }
   };
 
   useEffect(() => {

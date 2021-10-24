@@ -64,11 +64,20 @@ const NotificationOverlay = (prop: DropdownProps) => {
   };
 
   const acceptCallback = async (id: number) => {
-    await axios.post(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/notification/accept/${id}`,
-    );
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/notification/accept/${id}`,
+      );
+    } catch (error) {
+    }
+
     //TODO
     //notiList에서 해당 id 찾아서 type이 channel이면 targetid로 redirection
+
+    const acceptedNoti = notiList.find((noti) => noti.id == id);
+    console.log(`accept ? : `, acceptedNoti);
+
+
     setNotiList((notiList) => {
       return notiList.filter((noti) => {
         return noti.id != id;
@@ -76,13 +85,19 @@ const NotificationOverlay = (prop: DropdownProps) => {
     });
 
     //Redirect
-
+    if (acceptedNoti && acceptedNoti.title == "채팅방 초대")
+      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${acceptedNoti.id}`;
   };
 
   const rejectCallback = async (id: number) => {
-    await axios.delete(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/notification/${id}`,
-    );
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/notification/${id}`,
+      );
+    } catch (error) {
+      
+    }
+
     setNotiList((notiList) => {
       return notiList.filter((noti) => {
         return noti.id != id;
