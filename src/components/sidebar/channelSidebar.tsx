@@ -12,7 +12,7 @@ import InviteUserIcon from "./icon/inviteUser";
 import SettingIcon from "./icon/setting";
 import "./sidebar.scss";
 import SidebarItem from "./sidebarItem";
-import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, SidebarProps} from "./sidebarType";
+import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, SidebarProps, Status} from "./sidebarType";
 
 
 const ChannelSidebar = (prop: SidebarProps) => {
@@ -22,6 +22,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
     nickname: "",
     role: MemberRole.MEMBER,
   });
+  const [userId, setUserId] = useState(0);
 
   const modalHandler = prop.modalHandler;
   const isModalOpen = modalHandler.isModalOpen;
@@ -29,6 +30,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
   const handleModalClose = modalHandler.handleModalClose;
 
   useEffect(() => {
+
     getChannelmember();
   }, []);
 
@@ -48,7 +50,11 @@ const ChannelSidebar = (prop: SidebarProps) => {
 
     ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
       console.log(`updateChannelMember! : `, updateMember);
+
+
       setMemberList(memberList => memberList.map(member => {
+        if (member.userId == userId)
+          member.status = 1; //ONLINE
         if (member.userId == updateMember.userId) {
           return updateMember;
         }
@@ -66,6 +72,13 @@ const ChannelSidebar = (prop: SidebarProps) => {
   }, []);
 
   const getChannelmember = async () => {
+    try {
+      const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+      setUserId(user.data.id)
+    } catch (error) {
+      
+    }
+
     try {
       const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
       setMemberList(memberList.data);
