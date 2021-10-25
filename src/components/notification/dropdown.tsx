@@ -74,12 +74,8 @@ const NotificationOverlay = (prop: DropdownProps) => {
     } catch (error) {
     }
 
-    //TODO
-    //notiList에서 해당 id 찾아서 type이 channel이면 targetid로 redirection
-
     const acceptedNoti = notiList.find((noti) => noti.id == id);
     console.log(`accept ? : `, acceptedNoti);
-
 
     setNotiList((notiList) => {
       return notiList.filter((noti) => {
