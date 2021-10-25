@@ -10,6 +10,7 @@ import "./channel.scss";
 import GameModalListener from "../../components/modal/gameModalListener";
 import axios from "axios";
 import ChannelSidebar from "../../components/sidebar/channelSidebar";
+import snackbar from "../../components/snackbar/snackbar";
 
 type ChannelMessageDto = {
   channelId: number;
@@ -41,8 +42,25 @@ const Channel = () => {
 
   const [userId, setUserId] = useState(0);
   const [isMute, setIsMute] = useState(false);
+  const [muteExpired, setMuteExpired] = useState("");
   const [message, setMessage] = useState('');
   const { channelId } : any = useParams();
+
+  const setDateFormat = (expired: Date) => {
+    console.log(expired);
+    console.log(typeof(expired));
+    let year = expired.getFullYear();
+    let month = ('0' + (expired.getMonth() + 1)).slice(-2);
+    let day = ('0' + expired.getDate()).slice(-2);
+    let hours = ('0' + expired.getHours()).slice(-2); 
+    let minutes = ('0' + expired.getMinutes()).slice(-2);
+    let seconds = ('0' + expired.getSeconds()).slice(-2);
+
+    let dateString = year + '-' + month  + '-' + day;
+    let timeString = hours + ':' + minutes  + ':' + seconds;
+
+    setMuteExpired(dateString + " " + timeString);
+  }
 
   const channelInit = async () => {
     try {
@@ -64,7 +82,7 @@ const Channel = () => {
     try {
       const messageList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/message`);
       console.log(messageList);
-      setMessageList(messageList.data)
+      setMessageList(messageList.data);
       ioChannel.emit('subscribeChannel', channelId);
     } catch (error: any) {
      
@@ -75,17 +93,16 @@ const Channel = () => {
     channelInit();
 
     ioChannel.on('messageToClient', (message: ChannelMessage) => {
-      console.log(`message : `, messageList)
       setMessageList(messageList => [...messageList, message]);
     });
 
     ioChannel.on('muteMember', (channelId: number, expired: Date) => {
-      console.log(`mute!`);
+      snackbar.error("채널에서 음소거되었습니다.");
       setIsMute(true);
+      setDateFormat(new Date(expired));
     });
 
     ioChannel.on('unmuteMember', (channelId: number) => {
-      console.log(`unmute!`);
       setIsMute(false);
     });
   }, []);
@@ -131,7 +148,7 @@ const Channel = () => {
               <input 
                 disabled={isMute}
                 className="input-field"
-                placeholder="내용을 입력하세요"
+                placeholder={isMute ? `${muteExpired} 이후에 Mute가 풀립니다.` : "내용을 입력하세요"}
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 onKeyPress={sendMessage}

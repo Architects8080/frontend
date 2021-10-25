@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useHistory } from "react-router";
 import { ioChannel, ioCommunity } from "../../socket/socket";
 import DirectMessage from "../directMessage/directMessage";
 import ChannelAdminDropdownList from "../dropdown/dropdownList/channelAdmin";
@@ -16,6 +17,7 @@ import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, Sideba
 
 
 const ChannelSidebar = (prop: SidebarProps) => {
+  const history = useHistory();
   const [memberList, setMemberList] = useState<ChannelMember[]>([]);
   const [myProfile, setMyProfile] = useState<{ id: number; nickname: string; role: MemberRole}>({
     id: 0,
@@ -46,11 +48,19 @@ const ChannelSidebar = (prop: SidebarProps) => {
     ioChannel.on("removeChannelMember", (channelId: number, userId: number) => {
       console.log(`removeChannelMember!`);
       setMemberList(memberList => memberList.filter(joinMember => joinMember.userId != userId));
+      axios
+      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
+      .then(user => {
+        if (userId == user.data.id) {
+          snackbar.info("차단은 2시간 뒤에 해제됩니다.");
+          snackbar.error("채널에서 차단되었습니다.");
+          history.push(`/main`);
+        }
+      });
     });
 
     ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
       console.log(`updateChannelMember! : `, updateMember);
-
 
       setMemberList(memberList => memberList.map(member => {
         if (member.userId == userId)
@@ -85,7 +95,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
   
       const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
       const me = memberList.data.find((member: ChannelMember) => {
-        return member.userId == response.data.id
+        return member.userId == response.data.id;
       });
 
       //TODO: not update state
