@@ -14,7 +14,6 @@ import Channel from "./views/channel/channel";
 
 function App() {
   return (
-    // wip
     <div className="app">
       <Route exact path="/" component={Login} />
       <Route path="/login" component={Login} />

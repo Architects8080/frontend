@@ -86,7 +86,7 @@ const Profile = () => {
       history.push(`/main`);
     });
 
-  }, []);
+  }, [userId]);
 
   return (
     <>
