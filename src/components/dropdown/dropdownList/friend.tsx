@@ -14,8 +14,8 @@ const FriendDropdownList = (prop: DropdownListType) => {
   return (
     <div className="dropdown-list-wrap" style={position}>
       <ViewProfileItem targetId={info.targetId} />
-        {info.isInGame && info.gameId 
-          ? <ObserveGameItem gameId={info.gameId} />
+        {info.isPlaying
+          ? <ObserveGameItem targetId={info.targetId} />
           : <InviteGameItem
               targetId={info.targetId}
               modalHandler={prop.modalHandler}

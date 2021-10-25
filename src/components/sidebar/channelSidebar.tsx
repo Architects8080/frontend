@@ -13,7 +13,7 @@ import InviteUserIcon from "./icon/inviteUser";
 import SettingIcon from "./icon/setting";
 import "./sidebar.scss";
 import SidebarItem from "./sidebarItem";
-import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, SidebarProps, Status} from "./sidebarType";
+import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, SidebarProps} from "./sidebarType";
 
 
 const ChannelSidebar = (prop: SidebarProps) => {
@@ -165,6 +165,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
             targetId={member.userId}
             targetUser={member.user}
             targetRole={member.role}
+            targetStatus={member.status}
           />
         )) : null}
       </ul>

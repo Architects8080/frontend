@@ -199,18 +199,21 @@ const FriendSidebar = (prop: SidebarProps) => {
         </div>
       </div>
       <ul className="user-list">
-        {userList ? userList.map((user) => (
-          <li onClick={openDM} value={user.id} key={user.id}>
-            {user.alert && <span className="alert-overlay"></span>}
-            <SidebarItem
-              contextMenuHandler={contextMenuHandler}
-              itemType={SidebarProperty.FRIEND_LIST}
-              userId={myProfile.id}
-              targetId={user.id}
-              targetUser={user}
-            />
-          </li>
-        )): null}
+        {userList ?
+          userList.map((user) => (
+            <li onClick={openDM} value={user.id} key={user.id}>
+              {user.alert && <span className="alert-overlay"></span>}
+              <SidebarItem
+                contextMenuHandler={contextMenuHandler}
+                itemType={SidebarProperty.FRIEND_LIST}
+                userId={myProfile.id}
+                targetId={user.id}
+                targetUser={user}
+                targetStatus={user.status}
+              />
+            </li>
+          ))
+        : null}
       </ul>
       {DMopen && (
         <DirectMessage

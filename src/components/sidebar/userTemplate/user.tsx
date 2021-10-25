@@ -1,19 +1,19 @@
 import React from "react";
 import { User } from "../../../views/profile/profileType";
-import { DMUser, Status } from "../sidebarType";
+import { DMUser, StatusIcon } from "../sidebarType";
 import "./user.scss";
 
 const UserItem = (prop: User | DMUser) => {
   const statusToImage = (status: number) => {
     switch (status) {
       case 0:
-        return Status.OFFLINE;
+        return StatusIcon.OFFLINE;
       case 1: 
-        return Status.ONLINE;
+        return StatusIcon.ONLINE;
       case 2:
-        return Status.INGAME;
+        return StatusIcon.PLAYING;
       default:
-        return Status.OFFLINE;
+        return StatusIcon.OFFLINE;
     }
   }
   return (
