@@ -43,23 +43,25 @@ const Header = (prop: HeaderProps) => {
 
   useEffect(() => {
     //list check and url setting
-    axios
-    .all([
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/notification`),
-    ])
-    .then(
-      axios.spread((userInfo, notiList) => {
-        console.log(notiList);
-        setUser(userInfo.data);
-        setNotiCount(notiList.data.length);
-
-        if (notiList.data.length > 0) setNotifyIconURL(NotifyIconURL.ON);
-      })
-    )
-    .catch(error => {
-      history.push(`/login`);
-    });
+    if (prop.isLoggedIn) {
+      axios
+      .all([
+        axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`),
+        axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/notification`),
+      ])
+      .then(
+        axios.spread((userInfo, notiList) => {
+          console.log(notiList);
+          setUser(userInfo.data);
+          setNotiCount(notiList.data.length);
+  
+          if (notiList.data.length > 0) setNotifyIconURL(NotifyIconURL.ON);
+        })
+      )
+      .catch(error => {
+        history.push(`/login`);
+      });
+    }
   }, []);
 
   const updateNotiCount = (notiCount: number) => {
