@@ -52,8 +52,8 @@ const ChannelSidebar = (prop: SidebarProps) => {
       .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
       .then(user => {
         if (userId == user.data.id) {
-          snackbar.info("차단은 2시간 뒤에 해제됩니다.");
-          snackbar.error("채널에서 차단되었습니다.");
+          snackbar.info("추방은 2시간 뒤에 해제됩니다.");
+          snackbar.error("채널에서 추방되었습니다.");
           history.push(`/main`);
         }
       });
