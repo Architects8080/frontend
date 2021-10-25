@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ioCommunity } from "../../socket/socket";
 import { User } from "../../views/profile/profileType";
 import NotificationItem from "../dropdown/itemTemplate/notification/item";
+import snackbar from "../snackbar/snackbar";
 import "./dropdown.scss";
 
 //List를 Main에서 불러오면, 리스트 유무에 따른 icon img 변경
@@ -91,8 +92,13 @@ const NotificationOverlay = (prop: DropdownProps) => {
       try {
         const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${acceptedNoti.targetId}/member`);
       } catch (error: any) {
-        if (error.response.status != 409) 
+        if (error.response.status != 409) {
+          if (error.response.status == 403)
+            snackbar.error("채널에 접속할 수 없습니다.");
+          else
+            snackbar.error("알 수 없는 오류가 발생했습니다.")
           return
+        }
       }
       window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${acceptedNoti.targetId}`;
     }
