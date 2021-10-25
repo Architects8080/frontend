@@ -97,7 +97,7 @@ const Channel = () => {
     });
 
     ioChannel.on('muteMember', (channelId: number, expired: Date) => {
-      snackbar.error("채널에서 음소거되었습니다.");
+      snackbar.error("메시지를 보낼 수 없습니다.");
       setIsMute(true);
       setDateFormat(new Date(expired));
     });
