@@ -49,10 +49,19 @@ const ChannelSidebar = (prop: SidebarProps) => {
     ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
       console.log(`updateChannelMember! : `, updateMember);
       setMemberList(memberList => memberList.map(member => {
-        if (member.userId == updateMember.userId) 
+        if (member.userId == updateMember.userId) {
           return updateMember;
+        }
         return member;
-      }))
+      }));
+
+      axios
+      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
+      .then(user => {
+        if (updateMember.userId == user.data.id) {
+          setMyProfile(myProfile => ({...myProfile, role: updateMember.role}));
+        }
+      });
     });
   }, []);
 
@@ -63,11 +72,15 @@ const ChannelSidebar = (prop: SidebarProps) => {
   
       const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
       const me = memberList.data.find((member: ChannelMember) => {
-        return member.userId === response.data.id
+        return member.userId == response.data.id
       });
-      if (me)
-        setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
 
+      //TODO: not update state
+      if (me) {
+        setMyProfile((prevState) => { 
+          return { ...prevState, id: response.data.id, nickname: response.data.nickname, role: me.role}
+        });
+      }
     } catch (error) {
       console.log(`[getChannelmember] ${error}`);
     }
