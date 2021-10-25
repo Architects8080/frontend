@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { io } from "../../socket/socket";
 import { GameInfo } from "./gameType";
 import Header from "../../components/header/header";
@@ -9,6 +9,7 @@ import "./game.scss";
 import ModalHandler from "../../components/modal/modalhandler";
 
 const Game = () => {
+  const history = useHistory();
   const { gameId } = useParams<{ gameId: string }>();
   const [gameInfo, setGameInfo] = useState<GameInfo | null>(null);
   var temp: GameInfo | null = null;
@@ -45,7 +46,7 @@ const Game = () => {
     });
     io.on("vanished", (id: string) => {
       if (id == gameId) {
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+        history.push(`/main`);
       }
     });
     io.emit("observe", [gameId]);

@@ -1,10 +1,12 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useHistory } from "react-router";
 import Header from "../../../components/header/header";
 import snackbar from "../../../components/snackbar/snackbar";
 import "./otp.scss";
 
 const OTP = () => {
+  const history = useHistory();
   const [OTP, setOTP] = useState("");
 
   const handleUserInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +23,7 @@ const OTP = () => {
           { token: userInput },
         )
         .then((res) => {
-          window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+          history.push(`/main`);
         })
         .catch((err) => {
           snackbar.error("잘못된 코드입니다.");

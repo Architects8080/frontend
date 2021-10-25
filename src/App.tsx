@@ -12,7 +12,6 @@ import TestLogin from "./views/auth/test";
 import BlockList from "./views/blocklist/blocklist";
 import Channel from "./views/channel/channel";
 
-
 function App() {
   return (
     // wip

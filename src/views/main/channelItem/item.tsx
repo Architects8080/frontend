@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router";
 import EnterPasswordModal from "../../../components/modal/channel/join/enterPasswordModal";
 import ModalHandler from "../../../components/modal/modalhandler";
 import snackbar from "../../../components/snackbar/snackbar";
@@ -20,6 +21,7 @@ enum ChannelType {
 }
 
 const ChannelItem = ({channel} : {channel:ChannelItemProps}) => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
 
   const handleOnClick = async () => {
@@ -41,7 +43,7 @@ const ChannelItem = ({channel} : {channel:ChannelItemProps}) => {
             return
           }
         }
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${channel.id}`
+        history.push(`/channel/${channel.id}`);
       }
     } catch (error) {
       

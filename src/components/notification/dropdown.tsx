@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { useHistory } from "react-router";
 import { ioCommunity } from "../../socket/socket";
 import { User } from "../../views/profile/profileType";
 import NotificationItem from "../dropdown/itemTemplate/notification/item";
@@ -42,6 +43,7 @@ type NotificationItemProp = {
 };
 
 const NotificationOverlay = (prop: DropdownProps) => {
+  const history = useHistory();
   const [notiList, setNotiList] = useState<NotificationItemProp[]>([]);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ const NotificationOverlay = (prop: DropdownProps) => {
           return
         }
       }
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${acceptedNoti.targetId}`;
+      history.push(`/channel/${acceptedNoti.targetId}`);
     }
   };
 

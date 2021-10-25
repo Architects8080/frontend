@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router";
 import NotificationOverlay from "../notification/dropdown";
 import ProfileMenu from "../profile/dropdown";
 import "./header.scss";
@@ -24,6 +25,7 @@ type User = {
 };
 
 const Header = (prop: HeaderProps) => {
+  const history = useHistory();
   const [isNotiOverlayActive, setIsNotiOverlayActive] = useState(false);
   const [isProfileMenuActive, setIsProfileMenuActive] = useState(false);
   const [notifyIconURL, setNotifyIconURL] = useState(NotifyIconURL.OFF);
@@ -56,7 +58,7 @@ const Header = (prop: HeaderProps) => {
       })
     )
     .catch(error => {
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/login`;
+      history.push(`/login`);
     });
   }, []);
 
@@ -79,7 +81,7 @@ const Header = (prop: HeaderProps) => {
           className="title"
           onClick={() => {
             if (prop.isLoggedIn)
-              window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+              history.push(`/main`);
           }}
         >
           {" 42 Pong Pong "}

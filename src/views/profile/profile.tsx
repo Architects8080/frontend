@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import AchievementItem from "../../components/achievement/achievement";
 import EmptyPageInfo from "../../components/emptyPage/empty";
 import Header from "../../components/header/header";
@@ -13,6 +13,7 @@ import "./profile.scss";
 import { Achievement, GameTier, Match, MatchRatio, User } from "./profileType";
 
 const Profile = () => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
   const { userId } = useParams<{ userId: string }>();
 
@@ -32,7 +33,7 @@ const Profile = () => {
     axios
     .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`)
     .then((res) => {
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${res.data.id}`;
+      history.push(`/profile/${res.data.id}`);
     })
     .catch((err) => {
       snackbar.error("유저가 존재하지 않습니다.");
@@ -82,7 +83,7 @@ const Profile = () => {
       })
     )
     .catch((err) => {
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+      history.push(`/main`);
     });
 
   }, []);

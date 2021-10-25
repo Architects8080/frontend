@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Header from "../../components/header/header";
 import ModalHandler from "../../components/modal/modalhandler";
 import ChatMessage from "./message/message";
@@ -35,6 +35,7 @@ const AlwaysScrollToBottom = () => {
 };
 
 const Channel = () => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
   const [messageList, setMessageList] = useState<ChannelMessage[]>([]);
 
@@ -56,7 +57,7 @@ const Channel = () => {
     } catch (error: any) {
       console.log(error);
       if (error.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main `;
+        history.push(`/main`);
         window.alert("비정상적인 접근입니다");
       }
     }
@@ -107,7 +108,7 @@ const Channel = () => {
     } catch (error) {
       
     }
-    window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+    history.push(`/main`);
   }
 
   return (
