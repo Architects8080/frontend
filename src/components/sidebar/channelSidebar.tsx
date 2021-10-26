@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useHistory } from "react-router";
 import { ioChannel, ioCommunity } from "../../socket/socket";
 import DirectMessage from "../directMessage/directMessage";
 import ChannelAdminDropdownList from "../dropdown/dropdownList/channelAdmin";
@@ -16,73 +17,97 @@ import { ChannelMember, ContextMenuInfo, DM, MemberRole, SidebarProperty, Sideba
 
 
 const ChannelSidebar = (prop: SidebarProps) => {
+  const history = useHistory();
   const [memberList, setMemberList] = useState<ChannelMember[]>([]);
   const [myProfile, setMyProfile] = useState<{ id: number; nickname: string; role: MemberRole}>({
     id: 0,
     nickname: "",
     role: MemberRole.MEMBER,
   });
+  const [userId, setUserId] = useState(0);
 
   const modalHandler = prop.modalHandler;
   const isModalOpen = modalHandler.isModalOpen;
   const handleModalOpen = modalHandler.handleModalOpen;
   const handleModalClose = modalHandler.handleModalClose;
 
-  // first render -> get userList according to sidebarType(prop.title)
-  // const addMember = (newMemArr: UserItemProps[]) => {
-  //   setUserList(newMemArr);
-  // };
-  // const removeMember = (leavedArr: UserItemProps[]) => {
-  //   setUserList(leavedArr);
-  // };
+  useEffect(() => {
+
+    getChannelmember();
+  }, []);
 
   useEffect(() => {
-    getChannelmember();
-    // getMyProfile();
-  
-    // ioChannel.on("channelMemberAdd", (newMember: UserItemProps) => {
-    //   if (userList && !userList.some((user) => user.id === newMember.id)) {
-    //     const newMemArr = [...userList, newMember];
-    //     addMember(newMemArr);
-    //   }
-    // });
 
-    // ioChannel.on("channelMemberRemove", (userId) => {
-    //   if (userList) {
-    //     const leavedArr = userList.filter((user) => user.id !== userId);
-    //     removeMember(leavedArr);
-    //   }
-    // });
+    ioChannel.on("addChannelMember", (channelId: number, member: ChannelMember) => {
+      console.log(`addChannelMember!, member : `, member);
+      if (!memberList.some(joinMember => joinMember.userId == member.userId)) {
+        setMemberList(memberList => [...memberList, member]);
+      }
+    });
+
+    ioChannel.on("removeChannelMember", (channelId: number, userId: number) => {
+      console.log(`removeChannelMember!`);
+      setMemberList(memberList => memberList.filter(joinMember => joinMember.userId != userId));
+      axios
+      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
+      .then(user => {
+        if (userId == user.data.id) {
+          snackbar.info("추방은 2시간 뒤에 해제됩니다.");
+          snackbar.error("채널에서 추방되었습니다.");
+          history.push(`/main`);
+        }
+      });
+    });
+
+    ioChannel.on("updateChannelMember", (channelId: number, updateMember: ChannelMember) => {
+      console.log(`updateChannelMember! : `, updateMember);
+
+      setMemberList(memberList => memberList.map(member => {
+        if (member.userId == userId)
+          member.status = 1; //ONLINE
+        if (member.userId == updateMember.userId) {
+          return updateMember;
+        }
+        return member;
+      }));
+
+      axios
+      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
+      .then(user => {
+        if (updateMember.userId == user.data.id) {
+          setMyProfile(myProfile => ({...myProfile, role: updateMember.role}));
+        }
+      });
+    });
   }, []);
 
   const getChannelmember = async () => {
     try {
-      const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
-      console.log(`memberList.data : `, memberList.data);
-      setMemberList(memberList.data);
+      const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+      setUserId(user.data.id)
+    } catch (error) {
+      
+    }
 
-      const response = await axios.get(
-        `${process.env.REACT_APP_SERVER_ADDRESS}/user/me`,
-      );
+    try {
+      const memberList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/member`);
+      setMemberList(memberList.data);
+  
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
       const me = memberList.data.find((member: ChannelMember) => {
-        return member.userId === response.data.id
+        return member.userId == response.data.id;
       });
-      if (me)
-        setMyProfile({ id: response.data.id, nickname: response.data.nickname, role: me.role});
+
+      //TODO: not update state
+      if (me) {
+        setMyProfile((prevState) => { 
+          return { ...prevState, id: response.data.id, nickname: response.data.nickname, role: me.role}
+        });
+      }
     } catch (error) {
       console.log(`[getChannelmember] ${error}`);
     }
   }
-
-  // const getMyProfile = async () => {
-  //   try {
-
-
-
-  //   } catch (e) {
-  //     console.log(`[MyProfile] ${e}`);
-  //   }
-  // };
 
   // to contextMenu
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
@@ -131,7 +156,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
         {/* TODO: update  */}
         {memberList ? memberList.map((member) => (
           <SidebarItem
-            // key={member.id}
+            key={member.userId}
             itemType={SidebarProperty.CHAT_MEMBER_LIST}
             contextMenuHandler={contextMenuHandler}
             channelId={prop.channelId}
@@ -140,6 +165,7 @@ const ChannelSidebar = (prop: SidebarProps) => {
             targetId={member.userId}
             targetUser={member.user}
             targetRole={member.role}
+            targetStatus={member.status}
           />
         )) : null}
       </ul>

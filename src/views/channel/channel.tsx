@@ -1,8 +1,7 @@
 import React from "react";
-import * as uuid from 'uuid';
 import { useEffect } from "react";
 import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Header from "../../components/header/header";
 import ModalHandler from "../../components/modal/modalhandler";
 import ChatMessage from "./message/message";
@@ -11,19 +10,23 @@ import "./channel.scss";
 import GameModalListener from "../../components/modal/gameModalListener";
 import axios from "axios";
 import ChannelSidebar from "../../components/sidebar/channelSidebar";
+import snackbar from "../../components/snackbar/snackbar";
 
-// 서버로부터 받아서 message state 에 넣을 때 들어가는 형태
-type Message = {
-  id: string;
-  name: string;
-  text: string;
+type ChannelMessageDto = {
+  channelId: number;
+  message: string;
 };
 
 // 서버로부터 받는 메시지 형태
-type Payload = {
-  id: number;
-  name: string;
-  text: string;
+type ChannelMessage = {
+  id: number,
+  channelId: number;
+  message: string;
+  sender: {
+    id: number,
+    nickname: string,
+    avatar: string,
+  }
 }
 
 const AlwaysScrollToBottom = () => {
@@ -33,52 +36,96 @@ const AlwaysScrollToBottom = () => {
 };
 
 const Channel = () => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
-  const [messages, setMessages] = useState<Message[]>([]);
-  
-  const [text, setText] = useState('');
-  let { id } : any = useParams();
+  const [messageList, setMessageList] = useState<ChannelMessage[]>([]);
 
-  useEffect(() => {
-    const receivedMessage = (message: Payload) => {
-      const newMessage: Message = {
-        id: uuid.v4(),
-        name: message.name,
-        text: message.text,
-      };
-      setMessages([...messages, newMessage]);
+  const [userId, setUserId] = useState(0);
+  const [isMute, setIsMute] = useState(false);
+  const [muteExpired, setMuteExpired] = useState("");
+  const [message, setMessage] = useState('');
+  const { channelId } : any = useParams();
+
+  const setDateFormat = (expired: Date) => {
+    console.log(expired);
+    console.log(typeof(expired));
+    let year = expired.getFullYear();
+    let month = ('0' + (expired.getMonth() + 1)).slice(-2);
+    let day = ('0' + expired.getDate()).slice(-2);
+    let hours = ('0' + expired.getHours()).slice(-2); 
+    let minutes = ('0' + expired.getMinutes()).slice(-2);
+    let seconds = ('0' + expired.getSeconds()).slice(-2);
+
+    let dateString = year + '-' + month  + '-' + day;
+    let timeString = hours + ':' + minutes  + ':' + seconds;
+
+    setMuteExpired(dateString + " " + timeString);
+  }
+
+  const channelInit = async () => {
+    try {
+      const user = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`);
+      setUserId(user.data.id)
+    } catch (error) {
+      
     }
 
-    axios
-    .post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${id}/member`)
-    .then() //SUCCESS
-    .catch((e) => {
-      console.log(`error : `, e.response.data);
-      if (e.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main `;
+    try {
+      await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
+    } catch (error: any) {
+      console.log(error);
+      if (error.response.data.statusCode !== 409) { //Conflict Exception : is already join channel
+        history.push(`/main`);
         window.alert("비정상적인 접근입니다");
       }
-    })
+    }
+    try {
+      const messageList = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/message`);
+      console.log(messageList);
+      setMessageList(messageList.data);
+      ioChannel.emit('subscribeChannel', channelId);
+    } catch (error: any) {
+     
+    }
+  }
 
-    ioChannel.on('msgToClient', (message: Payload) => {
-      receivedMessage(message);
+  useEffect(() => {
+    channelInit();
+
+    ioChannel.on('messageToClient', (message: ChannelMessage) => {
+      setMessageList(messageList => [...messageList, message]);
     });
-  }, [messages, id]);
+
+    ioChannel.on('muteMember', (channelId: number, expired: Date) => {
+      snackbar.error("메시지를 보낼 수 없습니다.");
+      setIsMute(true);
+      setDateFormat(new Date(expired));
+    });
+
+    ioChannel.on('unmuteMember', (channelId: number) => {
+      setIsMute(false);
+    });
+  }, []);
 
   const sendMessage = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key !== 'Enter' || text === '')
+		if (e.key !== 'Enter' || message === '')
 			return;
-		const newMessageSend = {
-      channelId: id,
-      text: text,
+		const newMessageSend: ChannelMessageDto = {
+      channelId: Number(channelId),
+      message: message,
 		};
-		ioChannel.emit('msgToChannel', newMessageSend);
-		setText('');
+		ioChannel.emit('messageToServer', newMessageSend);
+		setMessage('');
 	}
 
   const leaveChannel = async () => {
-    await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${id}/member`);
-    window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+    ioChannel.emit(`unsubscribeChannel`, (channelId));
+    try {
+      await axios.delete(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channelId}/member`);
+    } catch (error) {
+      
+    }
+    history.push(`/main`);
   }
 
   return (
@@ -86,24 +133,24 @@ const Channel = () => {
       <Header isLoggedIn={true} />
       <div className="page">
         <ChannelSidebar
-          channelId={id}
+          channelId={channelId}
           modalHandler={modalHandler}
         />
         <div className="channel-wrap">
           <div className="channel-message-list-wrap">
             <div className="channel-message-list">
-              <ChatMessage isSelfMessage={false} nickname="chlee" content="test" />
-              {messages.map(message => (
-                <ChatMessage key={message.id} isSelfMessage={true} nickname={message.name} content={message.text}/>
-              ))}
+              {messageList.length != 0 ? messageList.map(message => (
+                <ChatMessage key={message.id} userId={userId} sender={message.sender} message={message.message}/>
+              )): ""}
               <AlwaysScrollToBottom/>
             </div>
             <div className="channel-user-input">
               <input 
+                disabled={isMute}
                 className="input-field"
-                placeholder="내용을 입력하세요"
-                value={text}
-                onChange={e => setText(e.target.value)}
+                placeholder={isMute ? `${muteExpired} 이후에 Mute가 풀립니다.` : "내용을 입력하세요"}
+                value={message}
+                onChange={e => setMessage(e.target.value)}
                 onKeyPress={sendMessage}
               />
             </div>

@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { useHistory } from "react-router";
 import GameResultModal from "../../../components/modal/game/gameResultModal";
 import {
   score,
@@ -23,6 +24,7 @@ type GameoverInfo = {
 };
 
 const Pong = ({ gameId, gameInfo }: PongProps) => {
+  const history = useHistory();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const moveUpSpeed = -7;
   const moveDownSpeed = 7;
@@ -54,7 +56,7 @@ const Pong = ({ gameId, gameInfo }: PongProps) => {
 
   const [isGameOver, setIsGameOver] = useState(false);
   const closeGameInviteModal = () => {
-    window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+    history.push(`/main`);
     setIsGameOver(false);
   };
 

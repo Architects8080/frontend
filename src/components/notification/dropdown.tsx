@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { useHistory } from "react-router";
 import { ioCommunity } from "../../socket/socket";
 import { User } from "../../views/profile/profileType";
 import NotificationItem from "../dropdown/itemTemplate/notification/item";
+import snackbar from "../snackbar/snackbar";
 import "./dropdown.scss";
 
 //List를 Main에서 불러오면, 리스트 유무에 따른 icon img 변경
@@ -23,15 +25,17 @@ type Notification = {
   id: number;
   senderId: number;
   receiverId: number;
+  sender: User;
   //채널 초대: channelId
   //친구 요청: senderId
-  sender: User;
   targetId: number;
   type: NotificationType;
 };
 
 type NotificationItemProp = {
   id: number;
+  targetId: number;
+  type: NotificationType
   title: string;
   description: string;
   acceptCallback: (id: number) => void;
@@ -39,6 +43,7 @@ type NotificationItemProp = {
 };
 
 const NotificationOverlay = (prop: DropdownProps) => {
+  const history = useHistory();
   const [notiList, setNotiList] = useState<NotificationItemProp[]>([]);
 
   useEffect(() => {
@@ -64,11 +69,16 @@ const NotificationOverlay = (prop: DropdownProps) => {
   };
 
   const acceptCallback = async (id: number) => {
-    await axios.post(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/notification/accept/${id}`,
-    );
-    //TODO
-    //notiList에서 해당 id 찾아서 type이 channel이면 targetid로 redirection
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/notification/accept/${id}`,
+      );
+    } catch (error) {
+    }
+
+    const acceptedNoti = notiList.find((noti) => noti.id == id);
+    console.log(`accept ? : `, acceptedNoti);
+
     setNotiList((notiList) => {
       return notiList.filter((noti) => {
         return noti.id != id;
@@ -76,13 +86,31 @@ const NotificationOverlay = (prop: DropdownProps) => {
     });
 
     //Redirect
-
+    if (acceptedNoti && acceptedNoti.type == NotificationType.CHANNEL) {
+      try {
+        const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${acceptedNoti.targetId}/member`);
+      } catch (error: any) {
+        if (error.response.status != 409) {
+          if (error.response.status == 403)
+            snackbar.error("채널에 접속할 수 없습니다.");
+          else
+            snackbar.error("알 수 없는 오류가 발생했습니다.")
+          return
+        }
+      }
+      history.push(`/channel/${acceptedNoti.targetId}`);
+    }
   };
 
   const rejectCallback = async (id: number) => {
-    await axios.delete(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/notification/${id}`,
-    );
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/notification/${id}`,
+      );
+    } catch (error) {
+      
+    }
+
     setNotiList((notiList) => {
       return notiList.filter((noti) => {
         return noti.id != id;
@@ -93,6 +121,8 @@ const NotificationOverlay = (prop: DropdownProps) => {
   const notificationToProps = (noti: Notification) => {
     return {
       id: noti.id,
+      targetId: noti.targetId,
+      type: noti.type,
       title: getTitleFromNotification(noti),
       description: getDescriptionFromNotification(noti),
       acceptCallback: acceptCallback,

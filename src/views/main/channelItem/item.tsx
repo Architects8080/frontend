@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router";
 import EnterPasswordModal from "../../../components/modal/channel/join/enterPasswordModal";
 import ModalHandler from "../../../components/modal/modalhandler";
+import snackbar from "../../../components/snackbar/snackbar";
 import { ioChannel } from "../../../socket/socket";
 import "./item.scss";
 
@@ -19,17 +21,35 @@ enum ChannelType {
 }
 
 const ChannelItem = ({channel} : {channel:ChannelItemProps}) => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
 
   const handleOnClick = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/me`);
-
-    if (channel.type === ChannelType.PROTECTED && 
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/me`);
+      if (channel.type === ChannelType.PROTECTED && 
         !response.data.find((element: any) => element.id === channel.id)) {
         modalHandler.handleModalOpen("enterPassword");
+      }
+      else {
+        try {
+          const access = await axios.post(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${channel.id}/member`);
+        } catch (error: any) {
+          if (error.response.status != 409) {
+            if (error.response.status == 403)
+              snackbar.error("채널에 접속할 수 없습니다.");
+            else
+              snackbar.error("알 수 없는 오류가 발생했습니다.")
+            return
+          }
+        }
+        history.push(`/channel/${channel.id}`);
+      }
+    } catch (error) {
+      
     }
-    else
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${channel.id}`
+
+
   };
 
   const handleModalClose = () => {

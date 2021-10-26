@@ -22,7 +22,8 @@ const HeaderDropdownList = () => {
     axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/me`)
     .then(response => {
       setUser(response.data);
-    });
+    })
+    .catch(() => {})
   }, []);
 
   return (

@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router";
 import DefaultDropdownItem from "../itemTemplate/default/item";
 
 type props = {
@@ -6,13 +7,15 @@ type props = {
 };
 
 const ViewProfileItem = (prop: props) => {
+  const history = useHistory();
+
   return (
     <>
       <DefaultDropdownItem
         title="프로필 보기"
         color="black"
         callback={() => {
-          window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${prop.targetId}`;
+          history.push(`/profile/${prop.targetId}`);
         }}
       />
     </>

@@ -1,10 +1,13 @@
 import React from "react";
+import { useHistory } from "react-router";
 import { io } from "../../../../socket/socket";
 import DefaultDropdownItem from "../../itemTemplate/default/item";
 
 const BlockListItem = () => {
+  const history = useHistory();
+
   const handleRedirect = () => {
-    window.location.href = process.env.REACT_APP_CLIENT_ADDRESS + "/blocklist";
+    history.push(`/blocklist`);
   };
 
   return (

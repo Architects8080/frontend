@@ -1,9 +1,15 @@
 import { User } from "../../views/profile/profileType";
 
 export enum Status {
-  ONLINE = "/icons/status/online.svg",
+  OFFLINE = 0,
+  ONLINE,
+  PLAYING,
+}
+
+export enum StatusIcon {
   OFFLINE = "/icons/status/offline.svg",
-  INGAME = "/icons/status/ingame.svg",
+  ONLINE = "/icons/status/online.svg",
+  PLAYING = "/icons/status/ingame.svg",
 }
 
 export enum SidebarProperty {
@@ -15,6 +21,7 @@ export enum SidebarProperty {
 export type ChannelMember = {
   id: number;
   channelId: number;
+  status: number;
   role: MemberRole;
   user: User;
   userId: number;
@@ -52,9 +59,8 @@ export type ContextMenuInfo = {
   userId: number;
   targetId: number;
 
-  isInGame: boolean;
+  isPlaying: boolean;
 
-  gameId: number;
   channelId: number;
 
   isFriend: boolean;

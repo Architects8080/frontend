@@ -10,7 +10,11 @@ type ItemProps = {
 
 const MuteUserItem = (prop: ItemProps) =>{
   const handleMuteUser = async () => {
-    await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/mute/${prop.targetId}`);
+    try {
+      await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/mute/${prop.targetId}`);
+    } catch (error) {
+      
+    }
   };
 
   return (

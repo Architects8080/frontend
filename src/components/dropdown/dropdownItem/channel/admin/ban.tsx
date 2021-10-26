@@ -10,7 +10,11 @@ type ItemProps = {
 
 const BanUserItem = (prop: ItemProps) => {
   const handleBanUser = async () => {
-    await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/ban/${prop.targetId}`);
+    try {
+      await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/ban/${prop.targetId}`);
+    } catch (error) {
+      
+    }
   };
 
   return (

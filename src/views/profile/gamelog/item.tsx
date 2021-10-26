@@ -33,11 +33,13 @@ const GameLogItem = (match: Match) => {
     if (match.targetId === leftPlayer.userId && leftPlayer.isWinner ||
         match.targetId === rightPlayer.userId && rightPlayer.isWinner)
       setIsVictory(true);
+    else
+      setIsVictory(false);
     if (!match.players[0].isLeft) {
       setLeftPlayer(match.players[1]);
       setRightPlayer(match.players[0]);
     }
-  }, []);
+  }, [match]);
 
   return (
     <div className="gamelog-wrap">

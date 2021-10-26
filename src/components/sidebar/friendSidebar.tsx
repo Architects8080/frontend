@@ -34,10 +34,7 @@ const FriendSidebar = (prop: SidebarProps) => {
     ioCommunity.on(
       "addFriendUser",
       async (friend: Omit<User, "alert">) => {
-        console.log(userList);
-        console.log(friend);
         const existIndex = userList.findIndex((f) => f.id == friend.id);
-        console.log(existIndex);
         if (existIndex == -1)
           setUserList((userList) => [...userList, { alert: false, ...friend }]);
       }
@@ -46,6 +43,14 @@ const FriendSidebar = (prop: SidebarProps) => {
     ioCommunity.on("removeFriendUser", async (friendId: number) => {
       setUserList((userList) => userList.filter((f) => f.id != friendId));
     });
+
+    ioCommunity.on("changeUserStatus",  (id: number, status: number) => {
+      setUserList(userList => userList.map((f) => { 
+        if (f.id == id)
+          f.status = status;
+        return f;
+      }));
+    })
   }, []);
 
   const getMyProfile = async () => {
@@ -194,18 +199,21 @@ const FriendSidebar = (prop: SidebarProps) => {
         </div>
       </div>
       <ul className="user-list">
-        {userList ? userList.map((user) => (
-          <li onClick={openDM} value={user.id}>
-            {user.alert && <span className="alert-overlay"></span>}
-            <SidebarItem
-              contextMenuHandler={contextMenuHandler}
-              itemType={SidebarProperty.FRIEND_LIST}
-              userId={myProfile.id}
-              targetId={user.id}
-              targetUser={user}
-            />
-          </li>
-        )): null}
+        {userList ?
+          userList.map((user) => (
+            <li onClick={openDM} value={user.id} key={user.id}>
+              {user.alert && <span className="alert-overlay"></span>}
+              <SidebarItem
+                contextMenuHandler={contextMenuHandler}
+                itemType={SidebarProperty.FRIEND_LIST}
+                userId={myProfile.id}
+                targetId={user.id}
+                targetUser={user}
+                targetStatus={user.status}
+              />
+            </li>
+          ))
+        : null}
       </ul>
       {DMopen && (
         <DirectMessage

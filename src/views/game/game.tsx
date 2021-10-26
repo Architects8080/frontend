@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { io } from "../../socket/socket";
 import { GameInfo } from "./gameType";
 import Header from "../../components/header/header";
@@ -9,9 +9,8 @@ import "./game.scss";
 import ModalHandler from "../../components/modal/modalhandler";
 
 const Game = () => {
-  const { id } = useParams<{ id: string }>();
-
-  const modalHandler = ModalHandler();
+  const history = useHistory();
+  const { gameId } = useParams<{ gameId: string }>();
   const [gameInfo, setGameInfo] = useState<GameInfo | null>(null);
   var temp: GameInfo | null = null;
 
@@ -22,14 +21,18 @@ const Game = () => {
   });
 
   const getPlayerInfo = async (playerId: number): Promise<any> => {
-    return axios.get(
-      process.env.REACT_APP_SERVER_ADDRESS + "/user/" + playerId
-    );
+    try {
+      return axios.get(
+        process.env.REACT_APP_SERVER_ADDRESS + "/user/" + playerId
+      );
+    } catch (error) {
+      
+    }
   };
 
   useEffect(() => {
-    io.on("update", async (gameId, updateInfo: GameInfo) => {
-      if (gameId == id) {
+    io.on("update", async (id, updateInfo: GameInfo) => {
+      if (id == gameId) {
         temp = updateInfo;
         setGameInfo(updateInfo);
       }
@@ -41,12 +44,12 @@ const Game = () => {
         playerInfo["player2"] = player2Data.data;
       }
     });
-    io.on("vanished", (gameId: string) => {
-      if (gameId == id) {
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+    io.on("vanished", (id: string) => {
+      if (id == gameId) {
+        history.push(`/main`);
       }
     });
-    io.emit("observe", [id]);
+    io.emit("observe", [gameId]);
   }, []);
 
   return (
@@ -81,7 +84,7 @@ const Game = () => {
               </div>
             </div>
             <div className="game-window">
-              <Pong gameId={id} gameInfo={gameInfo}></Pong>
+              <Pong gameId={gameId} gameInfo={gameInfo}></Pong>
             </div>
           </div>
         ) : (

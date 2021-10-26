@@ -7,9 +7,13 @@ type ItemProps = {
 
 const BlockDMItem = (prop: ItemProps) => {
   const handleBlockDM = async () => {
-    await axios.post(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/block/${prop.targetId}`
-    );
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/block/${prop.targetId}`
+      );
+    } catch (error) {
+      
+    }
   };
 
   return (

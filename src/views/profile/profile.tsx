@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import AchievementItem from "../../components/achievement/achievement";
 import EmptyPageInfo from "../../components/emptyPage/empty";
 import Header from "../../components/header/header";
@@ -13,8 +13,9 @@ import "./profile.scss";
 import { Achievement, GameTier, Match, MatchRatio, User } from "./profileType";
 
 const Profile = () => {
+  const history = useHistory();
   const modalHandler = ModalHandler();
-  const { id } = useParams<{ id: string }>();
+  const { userId } = useParams<{ userId: string }>();
 
   const [user, setUser] = useState<User | null>(null);
   // const [topRate, setTopRate] = useState<string>("100");
@@ -30,15 +31,13 @@ const Profile = () => {
     if (e.key !== "Enter" || search === "") return;
 
     axios
-      .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/profile/${res.data.id}`;
-      })
-      .catch((err) => {
-        snackbar.error("유저가 존재하지 않습니다.");
-      });
+    .get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/search/${search}`)
+    .then((res) => {
+      history.push(`/profile/${res.data.id}`);
+    })
+    .catch((err) => {
+      snackbar.error("유저가 존재하지 않습니다.");
+    });
   };
 
   const getTier = (ladderPoint: number) => {
@@ -62,9 +61,9 @@ const Profile = () => {
     axios
     .all([
       axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/${id}`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/match/user/${id}`),
-      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/achievement/${id}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/user/${userId}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/match/user/${userId}`),
+      axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/achievement/${userId}`),
     ])
     .then(
       axios.spread((userList, userInfo, matchList, achievementList) => { //achievementList
@@ -84,10 +83,10 @@ const Profile = () => {
       })
     )
     .catch((err) => {
-      window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/main`;
+      history.push(`/main`);
     });
 
-  }, []);
+  }, [userId]);
 
   return (
     <>
@@ -148,9 +147,9 @@ const Profile = () => {
               <div className="achievement-list">
                 { achievementTitle.map((title, index) => {
                     if (achievedList && achievedList.length != 0 && achievedList.find(achievement => achievement.id == index + 1))
-                      return <AchievementItem title={title} isAchieve={true} />
+                      return <AchievementItem key={index} title={title} isAchieve={true} />
                     else
-                      return <AchievementItem title={title} isAchieve={false} />
+                      return <AchievementItem key={index} title={title} isAchieve={false} />
                   })
                 }
               </div>

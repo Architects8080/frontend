@@ -48,8 +48,8 @@ const Main = () => {
     };
   };
 
-  const [channelList, setChannelList] = useState<ChannelItemProps[] | null>(null);
-  const [myChannelList, setMyChannelList] = useState<ChannelItemProps[] | null>(null);
+  const [channelList, setChannelList] = useState<ChannelItemProps[]>([]);
+  const [myChannelList, setMyChannelList] = useState<ChannelItemProps[]>([]);
 
   const getAllChannel = async () => {
     try {
@@ -76,6 +76,49 @@ const Main = () => {
     getMyChannel();
 	}, [category]);
 
+  useEffect(() => {
+    ioChannel.on('addMyChannel', (newChannel: ChannelItemProps) => {
+      console.log(`addMyChannel!`);
+      if (!myChannelList.some(myChannel => myChannel.id == newChannel.id)) {
+        setMyChannelList(myChannelList => [...myChannelList, newChannel]);
+      }
+    });
+
+    ioChannel.on('removeMyChannel', (channelId: number) => {
+      console.log(`removeMyChannel!`);
+      setMyChannelList(myChannelList => myChannelList.filter(myChannel => myChannel.id != channelId));
+    });
+
+    ioChannel.on('addChannel', (newChannel: ChannelItemProps) => {
+      console.log(`addChannel!`);
+      if (!channelList.some(channel => channel.id == newChannel.id)) {
+        setChannelList(channelList => [...channelList, newChannel]);
+      }
+    });
+
+    ioChannel.on('removeChannel', (channelId: number) => {
+      console.log(`removeChannel!`);
+      setChannelList(channelList => channelList.filter(channel => channel.id != channelId));
+    });
+
+    ioChannel.on('updateChannel', (channel: ChannelItemProps) => {
+      setMyChannelList(channelList => channelList.map(item => {
+        if (item.id == channel.id) 
+          return channel
+        return item;
+      }));
+      setChannelList(channelList => channelList.map(item => {
+        if (item.id == channel.id) 
+          return channel
+        return item;
+      }));
+    });
+
+    ioChannel.on('deleteChannel', (channelId: number) => {
+      console.log(`deleteChannel!`);
+      setChannelList(channelList => channelList.filter(channel => channel.id != channelId));
+    });
+  }, []);
 
   return (
     <>
@@ -113,9 +156,9 @@ const Main = () => {
             </div>
           </div>
 
-          {(category === ChannelCategory.CHANNEL_LIST && !channelList)
+          {(category === ChannelCategory.CHANNEL_LIST && channelList.length == 0)
             ? <EmptyPageInfo description={`공개 채팅방이 존재하지 않습니다.\n'채팅방 만들기' 버튼으로 채팅방을 생성해보세요!`}/>
-            : (category === ChannelCategory.MY_CHANNEL_LIST && !myChannelList)
+            : (category === ChannelCategory.MY_CHANNEL_LIST && myChannelList.length == 0)
               ? <EmptyPageInfo description={`현재 참여중인 채팅방이 없습니다.\n전체 채팅방 목록에서 참가해보세요!`}/> 
               : <div className="channel-list">
                   {category === ChannelCategory.CHANNEL_LIST && channelList

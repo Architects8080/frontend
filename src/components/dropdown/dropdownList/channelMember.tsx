@@ -20,8 +20,8 @@ const ChannelMemberDropdownList = (prop: DropdownListType) => {
       {info.targetId !== info.userId ? 
         <React.Fragment>
           {!info.isFriend ? <AddFriendItem targetId={info.targetId} /> : ""}
-          {info.isInGame && info.gameId ? (
-            <ObserveGameItem gameId={info.gameId} />
+          {info.isPlaying ? (
+            <ObserveGameItem targetId={info.targetId} />
           ) : (
             <InviteGameItem
               targetId={info.targetId}

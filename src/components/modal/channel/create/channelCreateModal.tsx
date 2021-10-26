@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { useHistory } from "react-router";
 import { ioChannel } from "../../../../socket/socket";
 import RadioButton from "../../../button/radio/radio";
 import "./channelCreateModal.scss";
@@ -23,6 +24,7 @@ export type ChannelCreateDto = {
 }
 
 const ChannelCreateModal = (prop: ChannelCreateModalProps) => {
+  const history = useHistory();
   const modalTitle = "채팅방 생성";
   const description = "채팅방을 만들어 다른 유저와 소통해보세요!";
 
@@ -72,7 +74,7 @@ const ChannelCreateModal = (prop: ChannelCreateModalProps) => {
         `${process.env.REACT_APP_SERVER_ADDRESS}/channel/`, channelDto
       ).then(response => {
         prop.close();
-        window.location.href = `${process.env.REACT_APP_CLIENT_ADDRESS}/channel/${response.data.channelId}`
+        history.push(`/channel/${response.data.channelId}`);
       }).catch(e => {
         console.log(e);
         setErrorText("채널 생성에 실패했습니다.");

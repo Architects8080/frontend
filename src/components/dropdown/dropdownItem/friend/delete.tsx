@@ -7,9 +7,12 @@ type ItemProps = {
 
 const DeleteFriendItem = (prop: ItemProps) => {
   const handleDeleteFriend = async () => {
-    await axios.delete(
-      `${process.env.REACT_APP_SERVER_ADDRESS}/friend/${prop.targetId}`
-    );
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_SERVER_ADDRESS}/friend/${prop.targetId}`
+      );
+    } catch (error) {
+    }
   };
 
   return (

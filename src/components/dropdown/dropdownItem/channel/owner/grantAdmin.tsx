@@ -10,7 +10,11 @@ type ItemProps = {
 
 const GrantAdminItem = (prop: ItemProps) => {
   const handleGrantAdmin = async () => {
-    await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/admin/${prop.targetId}`);
+    try {
+      await axios.put(`${process.env.REACT_APP_SERVER_ADDRESS}/channel/${prop.channelId}/admin/${prop.targetId}`);
+    } catch (error) {
+      
+    }
   };
 
   return (

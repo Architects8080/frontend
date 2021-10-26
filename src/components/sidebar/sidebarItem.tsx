@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { io } from "../../socket/socket";
 import { User } from "../../views/profile/profileType";
-import { ContextMenuInfo, DMUser, MemberRole, SidebarProperty } from "./sidebarType";
+import { ContextMenuInfo, DMUser, MemberRole, SidebarProperty, Status } from "./sidebarType";
 import UserItem from "./userTemplate/user";
 
 type SidebarItemProps = {
@@ -14,7 +14,7 @@ type SidebarItemProps = {
 
   targetUser: User | DMUser; //to with status?
   targetId: number;
-
+  targetStatus: number;
   // gameId?: number; //gameId or null
   channelId?: number; //channelId or null
   userRole?: MemberRole; //Channel
@@ -22,12 +22,11 @@ type SidebarItemProps = {
 };
 
 const menuInit = (menu: ContextMenuInfo) => {
-  menu.gameId = 0;
   menu.channelId = 0;
   menu.isAdmin = false;
   menu.isBannable = false;
   menu.isFriend = false;
-  menu.isInGame = false;
+  menu.isPlaying = false;
   menu.isMuteAble = false;
   menu.targetId = 0;
   menu.userId = 0;
@@ -36,12 +35,11 @@ const menuInit = (menu: ContextMenuInfo) => {
 
 const SidebarItem = (prop: SidebarItemProps) => {
   var menuInfo: ContextMenuInfo = {
-    gameId: 0,
     channelId: 0,
     isAdmin: false,
     isBannable: false,
     isFriend: false,
-    isInGame: false,
+    isPlaying: false,
     isMuteAble: false,
     targetId: 0,
     userId: 0,
@@ -51,6 +49,7 @@ const SidebarItem = (prop: SidebarItemProps) => {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_SERVER_ADDRESS}/friend`)
     .then(response => {setFriendList(response.data)})
+    .catch(() => {})
   }, []);
 
   const isFriend = () => {
@@ -62,13 +61,10 @@ const SidebarItem = (prop: SidebarItemProps) => {
   const handleDropdown = async (e: React.MouseEvent) => {
     menuInit(menuInfo);
 
-
     if (e.type === "contextmenu") {
       menuInfo.userId = prop.userId;
       menuInfo.targetId = prop.targetId;
-      menuInfo.isInGame = false; //TODO: set status
-      if (menuInfo.isInGame)
-        menuInfo.gameId = 0; //TODO: get gameId
+      menuInfo.isPlaying = prop.targetStatus == Status.PLAYING;
 
       if (prop.itemType === SidebarProperty.CHAT_MEMBER_LIST && prop.channelId) {
         menuInfo.myRole = prop.userRole;

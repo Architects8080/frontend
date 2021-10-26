@@ -12,21 +12,19 @@ import TestLogin from "./views/auth/test";
 import BlockList from "./views/blocklist/blocklist";
 import Channel from "./views/channel/channel";
 
-
 function App() {
   return (
-    // wip
     <div className="app">
       <Route exact path="/" component={Login} />
       <Route path="/login" component={Login} />
       <Route path="/main" component={Main} />
       <Route path="/test" component={TestLogin} />
-      <Route path="/profile/:id" component={Profile} />
-      <Route path="/game/:id" component={Game} />
+      <Route path="/profile/:userId" component={Profile} />
+      <Route path="/game/:gameId" component={Game} />
       <Route path="/setting" component={Setting} />
       <Route path="/otp" component={OTP} />
       <Route path="/register" component={Register} />
-      <Route path="/channel/:id" component={Channel} />
+      <Route path="/channel/:channelId" component={Channel} />
       <Route path="/blocklist" component={BlockList} />
     </div>
   );
